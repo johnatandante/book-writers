@@ -6,16 +6,15 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Current File",
+            "name": "Writers",
             "request": "launch",
-            "mainClass": "${file}"
+            "mainClass": "ts.volta.it.writers.Main"
         },
         {
             "type": "java",
-            "name": "Main",
+            "name": "Current File",
             "request": "launch",
-            "mainClass": "ts.volta.it.writers.Main",
-            "projectName": "writers-thread_1869c13b"
+            "mainClass": "${file}"
         }
     ]
 }
