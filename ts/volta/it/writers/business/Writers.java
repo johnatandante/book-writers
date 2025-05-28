@@ -1,19 +1,20 @@
 package ts.volta.it.writers.business;
 
+import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 import ts.volta.it.chatgpt.business.ChatGptWord;
 import ts.volta.it.writers.bean.Book;
-import ts.volta.it.writers.bean.Libro;
 
 public class Writers extends Thread {
-    
+    private static final String tag = "[writers] ";
     private String name;
     private Semaphore s;
     private Book book;
     private ChatGptWord chatGptWord;
     private boolean canWrite;
 
+    private Random r = new Random();
     public Writers(Semaphore s, String name, Book book) {
         this.name = name;
         this.s = s;
@@ -27,33 +28,23 @@ public class Writers extends Thread {
         while(this.canWrite && !exit) {
 
             try {
-                String sentence = chatGptWord.produceSentence();
                 s.acquire();
-                
-                if(!book.isFinished()) {
-                    // qua inizia l'area critica, ovvero quella di utilizzo dell'area condivisa
-                    System.out.printf("Mancano %d caratteri - ", Libro.MAX_CHARS - this.book.getText().length());
-                    this.canWrite = book.addSentence(sentence);
-                } else {
-                    exit = true;
-                }
-
-                s.release();
-                
-                if(!exit) {
-
-                    System.out.printf("%s ha aggiunto la frase '%s'\n", name, sentence);
+                System.out.println(tag + "Readers: " + Readers.NReaders);
+                if(Readers.NReaders > 0) {
+                    System.out.println(tag + "Writer " + this.name + " waiting for readers to finish");
                     
-                    if(!this.canWrite){
-                        System.out.printf("%s ha appena finito il libro'\n", name);
-                    } else {
-                        Thread.sleep(250 + (long)(Math.random() * 1000));
-
-                    }
+                } else {
+                    System.out.println(tag + tag + tag + "Writer " + this.name + " start writing");
+                    String sentence = chatGptWord.produceSentence();
+                    book.addSentence(sentence);
+                    Thread.sleep(250 + r.nextInt(1000)); // Simulate writing time
+                    System.out.println(tag + tag + tag + "Writer " + this.name + " wrote: " + sentence);
                 }
-
+                s.release();
+                Thread.sleep(1000 + r.nextInt(1000)); // Wait for readers to finish
+                
+                
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             
